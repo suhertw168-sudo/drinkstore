@@ -42,7 +42,7 @@ body{
 }
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:28px 18px 60px}
 
-header{text-align:center;margin-bottom:22px}
+header{text-align:center;margin-bottom:48px}
 .eyebrow{
   display:inline-block;font-size:13px;letter-spacing:.35em;color:var(--tea);
   background:var(--milk);border:1.5px solid var(--mint);border-radius:999px;
@@ -63,11 +63,12 @@ h1 .drop{color:var(--peach)}
 }
 .machine::before{ /* 頂部吸管裝飾 */
   content:"";
-  position:absolute;top:-34px;left:50%;
-  width:14px;height:46px;
+  position:absolute;top:-30px;left:68%;
+  width:14px;height:44px;
   background:linear-gradient(90deg,var(--peach) 0 50%,#ff9d6c 50% 100%);
   border-radius:7px;
   transform:translateX(-50%) rotate(14deg);
+  z-index:0;
 }
 .machine-title{
   text-align:center;font-weight:700;color:var(--tea);
@@ -218,6 +219,16 @@ h1 .drop{color:var(--peach)}
   border:1px solid #F3D9D9;
 }
 .chip button:hover{background:#FDECEC}
+.reset-btn{
+  display:block;margin:16px auto 0;
+  border:1.5px dashed var(--mint);cursor:pointer;
+  background:#FBFEFC;color:#8AA99B;font-family:inherit;
+  font-size:13px;letter-spacing:.1em;
+  padding:8px 18px;border-radius:999px;
+  transition:color .15s,border-color .15s;
+}
+.reset-btn:hover{color:var(--tea);border-color:var(--tea)}
+.reset-btn:focus-visible{outline:3px solid var(--lemon);outline-offset:2px}
 .empty{font-size:14px;color:#9DB8AC;padding:10px 2px}
 .count{margin-left:auto;font-size:12px;font-weight:400;color:#8AA99B}
 
@@ -274,6 +285,7 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
       <button id="addBtn">加入</button>
     </div>
     <div class="chips" id="chips"></div>
+    <button class="reset-btn" id="resetBtn" type="button">↺ 還原預設名單</button>
   </div>
 
   <footer>清新手搖・每日一抽</footer>
@@ -285,7 +297,7 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
 (function(){
   var STORE_KEY = 'drinkLotteryShops';
   var ITEM_H = 72;                 // 每列高度，需與 CSS 一致
-  var defaultShops = ['五十嵐','清心福全','可不可熟成紅茶','迷客夏','麻古茶坊'];
+  var defaultShops = ['五十嵐','清心福全','迷客夏','麻古茶坊','COMEBUY','大茗','龜記','得正','一沐日','青山','先喝道'];
   var shops = loadShops();
   var spinning = false;
 
@@ -358,6 +370,12 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
     saveShops(); renderChips(); buildReel();
   }
   addBtn.onclick = addShop;
+  document.getElementById('resetBtn').onclick = function(){
+    if(spinning) return;
+    if(!confirm('確定要還原成預設名單嗎？目前的名單會被覆蓋。')) return;
+    shops = defaultShops.slice();
+    saveShops(); renderChips(); buildReel();
+  };
   input.addEventListener('keydown', function(e){
     if(e.key === 'Enter'){ e.preventDefault(); addShop(); }
   });
