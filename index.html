@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天喝哪間？飲料店拉霸抽籤</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2FAF5;
+  --mint:#BFE8D4;
+  --tea:#3E9C77;
+  --tea-deep:#22664C;
+  --milk:#FFFFFF;
+  --lemon:#FFD97A;
+  --peach:#FFB18A;
+  --ink:#24473A;
+  --pearl:#5A4636;
+  --shadow:0 10px 30px rgba(34,102,76,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* 背景漂浮泡泡 */
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bubbles span{
+  position:absolute;bottom:-60px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), rgba(191,232,212,.35));
+  animation:float linear infinite;
+  opacity:.6;
+}
+@keyframes float{
+  to{transform:translateY(-110vh) rotate(20deg)}
+}
+@media (prefers-reduced-motion:reduce){
+  .bubbles span{animation:none;display:none}
+}
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:28px 18px 60px}
+
+header{text-align:center;margin-bottom:22px}
+.eyebrow{
+  display:inline-block;font-size:13px;letter-spacing:.35em;color:var(--tea);
+  background:var(--milk);border:1.5px solid var(--mint);border-radius:999px;
+  padding:5px 16px 5px 20px;margin-bottom:10px;
+}
+h1{font-size:30px;font-weight:900;color:var(--tea-deep);letter-spacing:.06em}
+h1 .drop{color:var(--peach)}
+.sub{font-size:14px;color:#6B8F80;margin-top:6px}
+
+/* ===== 拉霸機本體 ===== */
+.machine{
+  position:relative;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F6FCF9 100%);
+  border:2px solid var(--mint);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  padding:22px 20px 24px;
+}
+.machine::before{ /* 頂部吸管裝飾 */
+  content:"";
+  position:absolute;top:-34px;left:50%;
+  width:14px;height:46px;
+  background:linear-gradient(90deg,var(--peach) 0 50%,#ff9d6c 50% 100%);
+  border-radius:7px;
+  transform:translateX(-50%) rotate(14deg);
+}
+.machine-title{
+  text-align:center;font-weight:700;color:var(--tea);
+  font-size:14px;letter-spacing:.3em;margin-bottom:14px;
+}
+
+/* 透明杯造型的轉輪視窗 */
+.cup{
+  position:relative;
+  background:linear-gradient(180deg,rgba(236,250,244,.6),rgba(255,255,255,.9));
+  border:2.5px solid var(--tea);
+  border-top-width:4px;
+  border-radius:14px 14px 30px 30px;
+  height:216px;
+  overflow:hidden;
+}
+.cup::after{ /* 杯壁反光 */
+  content:"";position:absolute;top:8%;left:7%;
+  width:10px;height:60%;border-radius:8px;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,0));
+  pointer-events:none;
+}
+.reel-mask{position:absolute;inset:0;overflow:hidden}
+.reel{position:absolute;left:0;right:0;top:0;will-change:transform}
+.reel .item{
+  height:72px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:700;color:#8FB3A5;
+  white-space:nowrap;padding:0 12px;
+}
+/* 中央選取列 */
+.win-line{
+  position:absolute;top:50%;left:0;right:0;height:72px;
+  transform:translateY(-50%);
+  border-top:2px dashed var(--lemon);
+  border-bottom:2px dashed var(--lemon);
+  background:linear-gradient(90deg,rgba(255,217,122,0) 0%,rgba(255,217,122,.18) 50%,rgba(255,217,122,0) 100%);
+  pointer-events:none;
+}
+.win-line::before,.win-line::after{
+  content:"▸";position:absolute;top:50%;transform:translateY(-52%);
+  color:var(--peach);font-size:20px;
+}
+.win-line::before{left:6px}
+.win-line::after{right:6px;content:"◂"}
+
+/* 上下漸層遮罩 */
+.fade-top,.fade-bot{position:absolute;left:0;right:0;height:60px;pointer-events:none;z-index:2}
+.fade-top{top:0;background:linear-gradient(180deg,#fff,transparent)}
+.fade-bot{bottom:0;background:linear-gradient(0deg,#fff,transparent)}
+
+/* 杯底珍珠 */
+.pearls{
+  position:absolute;bottom:6px;left:0;right:0;height:26px;
+  display:flex;justify-content:center;gap:5px;pointer-events:none;z-index:2
+}
+.pearls i{
+  width:14px;height:14px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#7d6450,var(--pearl));
+  transform:translateY(var(--y,0));
+}
+.spinning .pearls i{animation:jiggle .35s ease-in-out infinite alternate}
+.pearls i:nth-child(odd){animation-delay:.12s}
+@keyframes jiggle{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+
+/* 拉桿 */
+.lever{
+  position:absolute;right:-14px;top:50%;
+  width:12px;height:96px;
+  transform:translateY(-80%);
+  transform-origin:bottom center;
+  transition:transform .25s ease;
+  z-index:3;
+}
+.lever .stick{width:8px;height:80px;background:linear-gradient(90deg,#cfe9dd,#9fcdb9);border-radius:4px;margin:0 auto}
+.lever .ball{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#ffd2b8,var(--peach));margin:-6px auto 0;box-shadow:0 3px 6px rgba(0,0,0,.15)}
+.machine.pulled .lever{transform:translateY(-80%) rotate(0deg) scaleY(.55)}
+
+/* 抽籤按鈕 */
+.spin-btn{
+  display:block;width:100%;margin-top:18px;
+  border:none;cursor:pointer;
+  background:linear-gradient(180deg,var(--tea) 0%,var(--tea-deep) 100%);
+  color:#fff;font-family:inherit;
+  font-size:20px;font-weight:900;letter-spacing:.4em;text-indent:.4em;
+  padding:16px;border-radius:999px;
+  box-shadow:0 6px 0 #1B4F3B, var(--shadow);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.spin-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 #1B4F3B}
+.spin-btn:disabled{opacity:.55;cursor:not-allowed}
+.spin-btn:focus-visible{outline:3px solid var(--lemon);outline-offset:3px}
+
+/* 結果區 */
+.result{
+  text-align:center;margin-top:18px;min-height:64px;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .4s ease,transform .4s ease;
+}
+.result.show{opacity:1;transform:none}
+.result .label{font-size:13px;color:#6B8F80;letter-spacing:.2em}
+.result .name{
+  font-size:28px;font-weight:900;color:var(--tea-deep);margin-top:2px;
+  text-shadow:0 2px 0 rgba(255,217,122,.6);
+}
+
+/* ===== 店家名單管理 ===== */
+.panel{
+  margin-top:26px;
+  background:var(--milk);
+  border:2px solid var(--mint);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+  padding:20px;
+}
+.panel h2{font-size:16px;font-weight:700;color:var(--tea-deep);display:flex;align-items:center;gap:8px}
+.panel h2::before{content:"🧋";font-size:18px}
+.panel .hint{font-size:12.5px;color:#8AA99B;margin:4px 0 12px}
+.add-row{display:flex;gap:8px}
+.add-row input{
+  flex:1;font-family:inherit;font-size:16px;
+  border:2px solid var(--mint);border-radius:12px;
+  padding:11px 14px;color:var(--ink);background:#FBFEFC;
+}
+.add-row input:focus{outline:none;border-color:var(--tea)}
+.add-row button{
+  border:none;cursor:pointer;font-family:inherit;
+  background:var(--lemon);color:#7A5A00;
+  font-size:15px;font-weight:700;
+  padding:0 20px;border-radius:12px;
+  box-shadow:0 3px 0 #E8BC4E;
+  transition:transform .08s;
+}
+.add-row button:active{transform:translateY(2px);box-shadow:none}
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#EAF7F0;border:1.5px solid var(--mint);
+  border-radius:999px;padding:7px 8px 7px 14px;
+  font-size:15px;font-weight:500;color:var(--tea-deep);
+  animation:pop .2s ease;
+}
+@keyframes pop{from{transform:scale(.8);opacity:0}}
+.chip button{
+  border:none;cursor:pointer;
+  width:22px;height:22px;border-radius:50%;
+  background:#fff;color:#C77;font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid #F3D9D9;
+}
+.chip button:hover{background:#FDECEC}
+.empty{font-size:14px;color:#9DB8AC;padding:10px 2px}
+.count{margin-left:auto;font-size:12px;font-weight:400;color:#8AA99B}
+
+/* 彩帶珍珠 */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:9}
+.confetti i{
+  position:absolute;top:-20px;border-radius:50%;
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  to{transform:translateY(110vh) rotate(360deg);opacity:.9}
+}
+footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spacing:.15em}
+</style>
+</head>
+<body>
+
+<div class="bubbles" id="bubbles"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DRINK LOTTERY</div>
+    <h1>今天喝哪間<span class="drop">？</span></h1>
+    <div class="sub">選擇困難就交給拉霸機吧 🍹</div>
+  </header>
+
+  <div class="machine" id="machine">
+    <div class="machine-title">— 飲料店拉霸機 —</div>
+    <div class="cup" id="cup">
+      <div class="reel-mask"><div class="reel" id="reel"></div></div>
+      <div class="fade-top"></div>
+      <div class="fade-bot"></div>
+      <div class="win-line"></div>
+      <div class="pearls">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <div class="lever" aria-hidden="true">
+      <div class="ball"></div>
+      <div class="stick"></div>
+    </div>
+    <button class="spin-btn" id="spinBtn">抽籤</button>
+    <div class="result" id="result">
+      <div class="label">🎉 就決定是你了</div>
+      <div class="name" id="resultName"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>店家名單<span class="count" id="count"></span></h2>
+    <div class="hint">輸入飲料店名稱後按「加入」，點 ✕ 可刪除。</div>
+    <div class="add-row">
+      <input type="text" id="shopInput" maxlength="20" placeholder="例如：五十嵐、清心福全…" enterkeyhint="done">
+      <button id="addBtn">加入</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <footer>清新手搖・每日一抽</footer>
+</div>
+
+<div class="confetti" id="confetti"></div>
+
+<script>
+(function(){
+  var STORE_KEY = 'drinkLotteryShops';
+  var ITEM_H = 72;                 // 每列高度，需與 CSS 一致
+  var defaultShops = ['五十嵐','清心福全','可不可熟成紅茶','迷客夏','麻古茶坊'];
+  var shops = loadShops();
+  var spinning = false;
+
+  var reel = document.getElementById('reel');
+  var chips = document.getElementById('chips');
+  var input = document.getElementById('shopInput');
+  var addBtn = document.getElementById('addBtn');
+  var spinBtn = document.getElementById('spinBtn');
+  var machine = document.getElementById('machine');
+  var cup = document.getElementById('cup');
+  var result = document.getElementById('result');
+  var resultName = document.getElementById('resultName');
+  var countEl = document.getElementById('count');
+
+  /* ---- 儲存（部署到 GitHub Pages 後可記住名單；預覽環境自動略過） ---- */
+  function loadShops(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(raw){
+        var arr = JSON.parse(raw);
+        if(Array.isArray(arr) && arr.length) return arr;
+      }
+    }catch(e){}
+    return defaultShops.slice();
+  }
+  function saveShops(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(shops)); }catch(e){}
+  }
+
+  /* ---- 名單 UI ---- */
+  function renderChips(){
+    chips.innerHTML = '';
+    if(!shops.length){
+      chips.innerHTML = '<div class="empty">名單是空的，先加入幾間店吧！</div>';
+    }else{
+      shops.forEach(function(name, i){
+        var chip = document.createElement('span');
+        chip.className = 'chip';
+        var txt = document.createElement('span');
+        txt.textContent = name;
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = '✕';
+        del.setAttribute('aria-label','刪除 ' + name);
+        del.onclick = function(){
+          if(spinning) return;
+          shops.splice(i,1);
+          saveShops(); renderChips(); buildReel();
+        };
+        chip.appendChild(txt); chip.appendChild(del);
+        chips.appendChild(chip);
+      });
+    }
+    countEl.textContent = shops.length ? '共 ' + shops.length + ' 間' : '';
+    spinBtn.disabled = shops.length < 2;
+    spinBtn.textContent = shops.length < 2 ? '至少需要兩間店' : '抽籤';
+  }
+
+  function addShop(){
+    var name = input.value.trim();
+    if(!name) return;
+    if(shops.indexOf(name) !== -1){
+      input.value = '';
+      input.placeholder = '「' + name + '」已在名單裡囉';
+      return;
+    }
+    shops.push(name);
+    input.value = '';
+    input.placeholder = '例如：五十嵐、清心福全…';
+    saveShops(); renderChips(); buildReel();
+  }
+  addBtn.onclick = addShop;
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); addShop(); }
+  });
+
+  /* ---- 轉輪 ---- */
+  var REPEAT = 12; // 名單重複次數，確保有足夠滾動距離
+  function buildReel(){
+    reel.innerHTML = '';
+    if(!shops.length) return;
+    for(var r = 0; r < REPEAT; r++){
+      shops.forEach(function(name){
+        var d = document.createElement('div');
+        d.className = 'item';
+        d.textContent = name;
+        reel.appendChild(d);
+      });
+    }
+    // 靜止時把第一個名字對齊中線
+    var center = cup.clientHeight / 2 - ITEM_H / 2;
+    reel.style.transition = 'none';
+    reel.style.transform = 'translateY(' + center + 'px)';
+  }
+
+  function spin(){
+    if(spinning || shops.length < 2) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    result.classList.remove('show');
+    machine.classList.add('pulled');
+    cup.classList.add('spinning');
+    setTimeout(function(){ machine.classList.remove('pulled'); }, 350);
+
+    var n = shops.length;
+    var winIdx = Math.floor(Math.random() * n);
+    var center = cup.clientHeight / 2 - ITEM_H / 2;
+    // 至少轉 8 圈再停在中獎位置
+    var targetRow = 8 * n + winIdx;
+    var targetY = center - targetRow * ITEM_H;
+    var duration = 2800 + Math.random() * 600;
+
+    // 先歸零再啟動動畫
+    reel.style.transition = 'none';
+    reel.style.transform = 'translateY(' + center + 'px)';
+    void reel.offsetHeight; // 強制 reflow
+    reel.style.transition = 'transform ' + duration + 'ms cubic-bezier(.12,.68,.16,1)';
+    reel.style.transform = 'translateY(' + targetY + 'px)';
+
+    setTimeout(function(){
+      cup.classList.remove('spinning');
+      resultName.textContent = shops[winIdx];
+      result.classList.add('show');
+      burstConfetti();
+      spinning = false;
+      spinBtn.disabled = false;
+    }, duration + 120);
+  }
+  spinBtn.onclick = spin;
+
+  /* ---- 珍珠彩帶 ---- */
+  function burstConfetti(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box = document.getElementById('confetti');
+    var colors = ['#5A4636','#FFD97A','#FFB18A','#3E9C77','#BFE8D4'];
+    for(var i = 0; i < 34; i++){
+      var p = document.createElement('i');
+      var size = 7 + Math.random() * 9;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      p.style.animationDelay = (Math.random() * .25) + 's';
+      box.appendChild(p);
+      (function(el){ setTimeout(function(){ el.remove(); }, 3600); })(p);
+    }
+  }
+
+  /* ---- 背景泡泡 ---- */
+  (function(){
+    var box = document.getElementById('bubbles');
+    for(var i = 0; i < 14; i++){
+      var s = document.createElement('span');
+      var size = 10 + Math.random() * 34;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.animationDuration = (12 + Math.random() * 16) + 's';
+      s.style.animationDelay = (-Math.random() * 20) + 's';
+      box.appendChild(s);
+    }
+  })();
+
+  renderChips();
+  buildReel();
+  window.addEventListener('resize', buildReel);
+})();
+</script>
+</body>
+</html>
