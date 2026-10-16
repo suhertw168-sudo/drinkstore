@@ -42,7 +42,7 @@ body{
 }
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:28px 18px 60px}
 
-header{text-align:center;margin-bottom:48px}
+header{text-align:center;margin-bottom:18px}
 .eyebrow{
   display:inline-block;font-size:13px;letter-spacing:.35em;color:var(--tea);
   background:var(--milk);border:1.5px solid var(--mint);border-radius:999px;
@@ -184,7 +184,7 @@ h1 .drop{color:var(--peach)}
   padding:20px;
 }
 .panel h2{font-size:16px;font-weight:700;color:var(--tea-deep);display:flex;align-items:center;gap:8px}
-.panel h2::before{content:"🧋";font-size:18px}
+.panel h2::before{content:attr(data-icon);font-size:18px}
 .panel .hint{font-size:12.5px;color:#8AA99B;margin:4px 0 12px}
 .add-row{display:flex;gap:8px}
 .add-row input{
@@ -212,14 +212,14 @@ h1 .drop{color:var(--peach)}
   animation:pop .2s ease;
 }
 @keyframes pop{from{transform:scale(.8);opacity:0}}
-.chip button{
+.chip .chip-del{
   border:none;cursor:pointer;
   width:22px;height:22px;border-radius:50%;
   background:#fff;color:#C77;font-size:13px;line-height:1;
   display:flex;align-items:center;justify-content:center;
   border:1px solid #F3D9D9;
 }
-.chip button:hover{background:#FDECEC}
+.chip .chip-del:hover{background:#FDECEC}
 .reset-btn{
   display:block;margin:16px auto 0;
   border:1.5px dashed var(--mint);cursor:pointer;
@@ -242,6 +242,100 @@ h1 .drop{color:var(--peach)}
 @keyframes fall{
   to{transform:translateY(110vh) rotate(360deg);opacity:.9}
 }
+/* ===== 停用 / 冷卻狀態 ===== */
+.chip-name{border:none;background:none;font:inherit;color:inherit;cursor:pointer;padding:0}
+.chip-name:focus-visible{outline:2px solid var(--lemon);outline-offset:2px;border-radius:4px}
+.chip.off{background:#F3F5F4;border-color:#E1E6E3;color:#A9B7B0}
+.chip.off .chip-name{text-decoration:line-through}
+.chip.cool{background:#FFF7DD;border-color:#FFE19A;color:#8A6A12}
+.chip .badge{font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;background:#fff;border:1px solid currentColor;line-height:1.5}
+
+/* ===== 冷卻規則 ===== */
+.seg{display:flex;gap:6px}
+.seg button{
+  flex:1;min-width:0;border:2px solid var(--mint);background:#FBFEFC;color:#6B8F80;
+  font-family:inherit;font-size:14px;font-weight:700;padding:9px 0;border-radius:12px;cursor:pointer;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.seg button.active{background:var(--tea);border-color:var(--tea);color:#fff}
+.seg button:focus-visible{outline:3px solid var(--lemon);outline-offset:2px}
+.pool-note{font-size:12.5px;color:#C08A2E;margin-top:10px}
+.pool-note:empty{display:none}
+
+/* ===== 抽籤紀錄 ===== */
+.history{list-style:none;margin-top:6px}
+.h-item{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px dashed #DDEFE5;font-size:15px}
+.h-item:last-child{border-bottom:none}
+.h-item.latest{background:#F4FBF7;border-radius:10px}
+.h-mode{flex-shrink:0}
+.h-name{flex:1;min-width:0;font-weight:700;color:var(--tea-deep);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-time{flex-shrink:0;font-size:12px;color:#8AA99B}
+
+/* ===== 模式切換 ===== */
+.mode-switch{
+  display:flex;gap:4px;max-width:300px;margin:0 auto 46px;
+  background:var(--milk);border:2px solid var(--mint);border-radius:999px;
+  padding:4px;box-shadow:var(--shadow);
+}
+.mode-btn{
+  flex:1;border:none;cursor:pointer;font-family:inherit;
+  font-size:15px;font-weight:700;color:#7FA595;background:transparent;
+  padding:9px 0;border-radius:999px;transition:background .2s,color .2s;
+}
+.mode-btn.active{background:var(--tea);color:#fff}
+.mode-btn:disabled{cursor:not-allowed}
+.mode-btn:focus-visible{outline:3px solid var(--lemon);outline-offset:2px}
+
+/* 模式顯示控制 */
+.wheel-stage{display:none;position:relative;margin:0 auto}
+.machine.mode-wheel .wheel-stage{display:block}
+.machine.mode-wheel .cup,
+.machine.mode-wheel .lever,
+.machine.mode-wheel::before{display:none}
+
+/* ===== 摩天輪 ===== */
+.wheel-pointer{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  color:var(--peach);font-size:22px;z-index:5;line-height:1;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));
+}
+.wheel-legs{position:absolute;top:16px;left:0;right:0;margin:0 auto;z-index:1;overflow:visible}
+.wheel{position:absolute;top:16px;left:0;right:0;margin:0 auto;z-index:2;will-change:transform}
+.wheel-frame{position:absolute;inset:0;overflow:visible}
+.g-pivot{position:absolute;width:0;height:0;z-index:3;will-change:transform}
+.g-pivot::before{ /* 掛點 */
+  content:"";position:absolute;left:-4px;top:-4px;width:8px;height:8px;
+  border-radius:50%;background:var(--tea-deep);
+}
+.g-pivot::after{ /* 吊桿 */
+  content:"";position:absolute;left:-1px;top:0;width:2px;height:7px;background:var(--tea-deep);
+}
+.g-pivot.win-pivot{z-index:4}
+.gondola{
+  position:absolute;top:6px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(34,102,76,.35);
+  border-radius:8px 8px 14px 14px;
+  font-weight:700;color:var(--tea-deep);
+  box-shadow:0 2px 4px rgba(34,102,76,.12);
+  padding:2px 3px;text-align:center;
+  transform-origin:top center;
+  transition:transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.gondola span{
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;word-break:break-all;line-height:1.12;
+}
+.gondola.c0{background:#DFF3E8}
+.gondola.c1{background:#FFF1C9}
+.gondola.c2{background:#FFE0D1}
+.gondola.c3{background:#DDEFFB}
+.gondola.win{
+  transform:scale(1.22);
+  border-color:var(--lemon);
+  box-shadow:0 0 0 3px var(--lemon),0 8px 16px rgba(34,102,76,.2);
+}
+
 footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spacing:.15em}
 </style>
 </head>
@@ -253,11 +347,21 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
   <header>
     <div class="eyebrow">DRINK LOTTERY</div>
     <h1>今天喝哪間<span class="drop">？</span></h1>
-    <div class="sub">選擇困難就交給拉霸機吧 🍹</div>
+    <div class="sub">選擇困難就交給<span id="modeWord">拉霸機</span>吧 🍹</div>
   </header>
 
+  <div class="mode-switch" role="group" aria-label="切換抽籤模式">
+    <button type="button" class="mode-btn active" data-mode="slot" aria-pressed="true">🎰 拉霸機</button>
+    <button type="button" class="mode-btn" data-mode="wheel" aria-pressed="false">🎡 摩天輪</button>
+  </div>
+
   <div class="machine" id="machine">
-    <div class="machine-title">— 飲料店拉霸機 —</div>
+    <div class="machine-title" id="machineTitle">— 飲料店拉霸機 —</div>
+    <div class="wheel-stage" id="wheelStage">
+      <div class="wheel-pointer" aria-hidden="true">▼</div>
+      <svg class="wheel-legs" id="wheelLegs" aria-hidden="true"></svg>
+      <div class="wheel" id="wheel"></div>
+    </div>
     <div class="cup" id="cup">
       <div class="reel-mask"><div class="reel" id="reel"></div></div>
       <div class="fade-top"></div>
@@ -279,14 +383,32 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
   </div>
 
   <div class="panel">
-    <h2>店家名單<span class="count" id="count"></span></h2>
-    <div class="hint">輸入飲料店名稱後按「加入」，點 ✕ 可刪除。</div>
+    <h2 data-icon="🧋">店家名單<span class="count" id="count"></span></h2>
+    <div class="hint">輸入店名後按「加入」。點店名可暫停／恢復（例如今天公休），點 ✕ 刪除。</div>
     <div class="add-row">
       <input type="text" id="shopInput" maxlength="20" placeholder="例如：五十嵐、清心福全…" enterkeyhint="done">
       <button id="addBtn">加入</button>
     </div>
     <div class="chips" id="chips"></div>
     <button class="reset-btn" id="resetBtn" type="button">↺ 還原預設名單</button>
+  </div>
+
+  <div class="panel">
+    <h2 data-icon="⏳">冷卻規則</h2>
+    <div class="hint">排除最近幾次抽中的店，避免連續好幾天都喝同一間。</div>
+    <div class="seg" id="cooldownSeg" role="group" aria-label="冷卻次數">
+      <button type="button" data-cd="0">關閉</button>
+      <button type="button" data-cd="1">1 次</button>
+      <button type="button" data-cd="2">2 次</button>
+      <button type="button" data-cd="3">3 次</button>
+    </div>
+    <div class="pool-note" id="poolNote"></div>
+  </div>
+
+  <div class="panel">
+    <h2 data-icon="📜">抽籤紀錄<span class="count">保留最近 20 筆</span></h2>
+    <ul class="history" id="historyList"></ul>
+    <button class="reset-btn" id="clearHistoryBtn" type="button">清除紀錄</button>
   </div>
 
   <footer>清新手搖・每日一抽</footer>
@@ -296,10 +418,17 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
 
 <script>
 (function(){
-  var STORE_KEY = 'drinkLotteryShops';
-  var ITEM_H = 72;                 // 每列高度，需與 CSS 一致
-  var defaultShops = ['五十嵐','清心福全','迷客夏','麻古茶坊','COMEBUY','大茗','龜記','得正','一沐日','青山','先喝道'];
-  var shops = loadShops();
+  var OLD_KEY = 'drinkLotteryShops';   // 舊版只存店名陣列
+  var DATA_KEY = 'drinkLotteryData';    // 新版完整資料
+  var ITEM_H = 72;                      // 每列高度，需與 CSS 一致
+  var HISTORY_MAX = 20;
+  var defaultNames = ['五十嵐','清心福全','迷客夏','麻古茶坊','COMEBUY','大茗','龜記','得正','一沐日','青山','先喝道'];
+
+  var shopList = [];               // 完整名單：{ id, name, enabled }
+  var history = [];                // 抽籤紀錄（新到舊）：{ name, time, mode }
+  var settings = { cooldown: 2 };  // 冷卻：排除最近幾次抽中的店
+  var shops = [];                  // 目前轉輪／摩天輪上的店名（可抽名單）
+  var poolDirty = false;           // 抽完後名單有變，下次轉動前再更新畫面
   var spinning = false;
 
   var reel = document.getElementById('reel');
@@ -312,79 +441,222 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
   var result = document.getElementById('result');
   var resultName = document.getElementById('resultName');
   var countEl = document.getElementById('count');
+  var poolNote = document.getElementById('poolNote');
+  var historyList = document.getElementById('historyList');
+  var clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  var cooldownBtns = document.querySelectorAll('#cooldownSeg button');
 
-  /* ---- 儲存（部署到 GitHub Pages 後可記住名單；預覽環境自動略過） ---- */
-  function loadShops(){
-    try{
-      var raw = localStorage.getItem(STORE_KEY);
-      if(raw){
-        var arr = JSON.parse(raw);
-        if(Array.isArray(arr) && arr.length) return arr;
-      }
-    }catch(e){}
-    return defaultShops.slice();
+  /* ---- 資料存取（部署到 GitHub Pages 後可記住；預覽環境自動略過） ---- */
+  function uid(){ return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function makeShop(name){ return { id: uid(), name: name, enabled: true }; }
+
+  function loadData(){
+    var data = null;
+    try{ var raw = localStorage.getItem(DATA_KEY); if(raw) data = JSON.parse(raw); }catch(e){}
+    if(data && Array.isArray(data.shops)){
+      shopList = data.shops.filter(function(x){ return x && typeof x.name === 'string'; })
+        .map(function(x){ return { id: x.id || uid(), name: x.name, enabled: x.enabled !== false }; });
+      history = Array.isArray(data.history) ? data.history.slice(0, HISTORY_MAX) : [];
+      if(data.settings && typeof data.settings.cooldown === 'number') settings.cooldown = data.settings.cooldown;
+      return;
+    }
+    // 舊版資料（只有店名）自動轉換成新格式
+    var old = null;
+    try{ var r2 = localStorage.getItem(OLD_KEY); if(r2) old = JSON.parse(r2); }catch(e){}
+    var names = (Array.isArray(old) && old.length) ? old : defaultNames;
+    shopList = names.filter(function(n){ return typeof n === 'string'; }).map(makeShop);
+    saveData();
   }
-  function saveShops(){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(shops)); }catch(e){}
+  function saveData(){
+    try{
+      localStorage.setItem(DATA_KEY, JSON.stringify({ version: 2, shops: shopList, history: history, settings: settings }));
+    }catch(e){}
+  }
+
+  /* ---- 可抽名單計算 ---- */
+  function recentNames(k){
+    return history.slice(0, k).map(function(h){ return h.name; });
+  }
+  // 回傳可抽的店名；若冷卻後不足兩間，自動逐步放寬冷卻次數
+  function calcPool(){
+    var enabled = shopList.filter(function(x){ return x.enabled; }).map(function(x){ return x.name; });
+    var k = settings.cooldown, names;
+    while(true){
+      var cool = recentNames(k);
+      names = enabled.filter(function(n){ return cool.indexOf(n) === -1; });
+      if(names.length >= 2 || k <= 0) break;
+      k--;
+    }
+    return { names: names, k: k, enabledCount: enabled.length };
+  }
+  function refreshPool(){
+    shops = calcPool().names;
+    poolDirty = false;
+  }
+  function changed(){
+    saveData();
+    renderChips();
+    refreshPool();
+    buildReel();
   }
 
   /* ---- 名單 UI ---- */
   function renderChips(){
+    var p = calcPool();
+    var cool = recentNames(p.k);
     chips.innerHTML = '';
-    if(!shops.length){
+    if(!shopList.length){
       chips.innerHTML = '<div class="empty">名單是空的，先加入幾間店吧！</div>';
     }else{
-      shops.forEach(function(name, i){
+      shopList.forEach(function(s){
         var chip = document.createElement('span');
         chip.className = 'chip';
-        var txt = document.createElement('span');
-        txt.textContent = name;
+        var isCool = s.enabled && cool.indexOf(s.name) !== -1;
+        if(!s.enabled) chip.classList.add('off');
+        else if(isCool) chip.classList.add('cool');
+
+        var nameBtn = document.createElement('button');
+        nameBtn.type = 'button';
+        nameBtn.className = 'chip-name';
+        nameBtn.textContent = s.name;
+        nameBtn.setAttribute('aria-pressed', s.enabled ? 'true' : 'false');
+        nameBtn.title = s.enabled ? '點一下暫停這間店' : '點一下恢復這間店';
+        nameBtn.onclick = function(){
+          if(spinning) return;
+          s.enabled = !s.enabled;
+          changed();
+        };
+        chip.appendChild(nameBtn);
+
+        if(!s.enabled || isCool){
+          var badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.textContent = !s.enabled ? '暫停' : '冷卻';
+          chip.appendChild(badge);
+        }
+
         var del = document.createElement('button');
         del.type = 'button';
+        del.className = 'chip-del';
         del.textContent = '✕';
-        del.setAttribute('aria-label','刪除 ' + name);
+        del.setAttribute('aria-label', '刪除 ' + s.name);
         del.onclick = function(){
           if(spinning) return;
-          shops.splice(i,1);
-          saveShops(); renderChips(); buildReel();
+          shopList = shopList.filter(function(x){ return x.id !== s.id; });
+          changed();
         };
-        chip.appendChild(txt); chip.appendChild(del);
+        chip.appendChild(del);
         chips.appendChild(chip);
       });
     }
-    countEl.textContent = shops.length ? '共 ' + shops.length + ' 間' : '';
-    spinBtn.disabled = shops.length < 2;
-    spinBtn.textContent = shops.length < 2 ? '至少需要兩間店' : '抽籤';
+
+    countEl.textContent = shopList.length ? '共 ' + shopList.length + ' 間・可抽 ' + p.names.length + ' 間' : '';
+    poolNote.textContent = (settings.cooldown > 0 && p.k < settings.cooldown && p.enabledCount >= 2)
+      ? '可抽的店太少，這次自動放寬為排除最近 ' + p.k + ' 次。' : '';
+    if(!spinning){
+      spinBtn.disabled = p.names.length < 2;
+      spinBtn.textContent = p.names.length < 2 ? '至少需要兩間可抽的店' : '抽籤';
+    }
   }
 
   function addShop(){
     var name = input.value.trim();
     if(!name) return;
-    if(shops.indexOf(name) !== -1){
+    if(shopList.some(function(x){ return x.name === name; })){
       input.value = '';
       input.placeholder = '「' + name + '」已在名單裡囉';
       return;
     }
-    shops.push(name);
+    shopList.push(makeShop(name));
     input.value = '';
     input.placeholder = '例如：五十嵐、清心福全…';
-    saveShops(); renderChips(); buildReel();
+    changed();
   }
   addBtn.onclick = addShop;
   document.getElementById('resetBtn').onclick = function(){
     if(spinning) return;
-    if(!confirm('確定要還原成預設名單嗎？目前的名單會被覆蓋。')) return;
-    shops = defaultShops.slice();
-    saveShops(); renderChips(); buildReel();
+    if(!confirm('確定要還原成預設名單嗎？目前的名單會被覆蓋（抽籤紀錄會保留）。')) return;
+    shopList = defaultNames.map(makeShop);
+    changed();
   };
   input.addEventListener('keydown', function(e){
     if(e.key === 'Enter'){ e.preventDefault(); addShop(); }
   });
 
+  /* ---- 冷卻規則 ---- */
+  function renderCooldown(){
+    for(var i = 0; i < cooldownBtns.length; i++){
+      var on = Number(cooldownBtns[i].getAttribute('data-cd')) === settings.cooldown;
+      cooldownBtns[i].classList.toggle('active', on);
+      cooldownBtns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+  for(var ci = 0; ci < cooldownBtns.length; ci++){
+    cooldownBtns[ci].onclick = function(){
+      if(spinning) return;
+      settings.cooldown = Number(this.getAttribute('data-cd'));
+      renderCooldown();
+      changed();
+    };
+  }
+
+  /* ---- 抽籤紀錄 ---- */
+  var WEEK = '日一二三四五六';
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function fmtTime(t){
+    var d = new Date(t);
+    return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WEEK[d.getDay()] + '）' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function renderHistory(){
+    historyList.innerHTML = '';
+    if(!history.length){
+      historyList.innerHTML = '<li class="empty">還沒有抽籤紀錄，先來抽一次吧！</li>';
+      clearHistoryBtn.style.display = 'none';
+      return;
+    }
+    clearHistoryBtn.style.display = '';
+    history.forEach(function(h, i){
+      var li = document.createElement('li');
+      li.className = 'h-item' + (i === 0 ? ' latest' : '');
+      var m = document.createElement('span');
+      m.className = 'h-mode';
+      m.textContent = h.mode === 'wheel' ? '🎡' : '🎰';
+      var n = document.createElement('span');
+      n.className = 'h-name';
+      n.textContent = h.name;
+      var t = document.createElement('span');
+      t.className = 'h-time';
+      t.textContent = fmtTime(h.time);
+      li.appendChild(m); li.appendChild(n); li.appendChild(t);
+      historyList.appendChild(li);
+    });
+  }
+  clearHistoryBtn.onclick = function(){
+    if(spinning) return;
+    if(!confirm('確定要清除所有抽籤紀錄嗎？冷卻狀態也會一併重置。')) return;
+    history = [];
+    renderHistory();
+    changed();
+  };
+
+  // 抽中後：顯示結果、寫入紀錄（轉盤等下次轉動前才更新，避免中獎畫面跳動）
+  function onWin(name){
+    resultName.textContent = name;
+    history.unshift({ name: name, time: Date.now(), mode: mode });
+    if(history.length > HISTORY_MAX) history.length = HISTORY_MAX;
+    saveData();
+    poolDirty = true;
+    renderChips();
+    renderHistory();
+  }
+
+  loadData();
+
   /* ---- 轉輪 ---- */
   var REPEAT = 12; // 名單重複次數，確保有足夠滾動距離
   function buildReel(){
     reel.innerHTML = '';
+    buildWheel();
     if(!shops.length) return;
     for(var r = 0; r < REPEAT; r++){
       shops.forEach(function(name){
@@ -394,16 +666,17 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
         reel.appendChild(d);
       });
     }
-    // 靜止時把第一個名字對齊中線
-    var center = cup.clientHeight / 2 - ITEM_H / 2;
+    // 靜止時把第一個名字對齊中線（杯高固定 216px，隱藏時也能正確計算）
+    var center = 216 / 2 - ITEM_H / 2;
     reel.style.transition = 'none';
     reel.style.transform = 'translateY(' + center + 'px)';
   }
 
-  function spin(){
+  function spinSlot(){
     if(spinning || shops.length < 2) return;
     spinning = true;
     spinBtn.disabled = true;
+    setModeButtonsDisabled(true);
     result.classList.remove('show');
     machine.classList.add('pulled');
     cup.classList.add('spinning');
@@ -426,14 +699,185 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
 
     setTimeout(function(){
       cup.classList.remove('spinning');
-      resultName.textContent = shops[winIdx];
+      onWin(shops[winIdx]);
       result.classList.add('show');
       burstConfetti();
       spinning = false;
       spinBtn.disabled = false;
+      setModeButtonsDisabled(false);
     }, duration + 120);
   }
-  spinBtn.onclick = spin;
+  /* ---- 摩天輪 ---- */
+  var wheelStage = document.getElementById('wheelStage');
+  var wheel = document.getElementById('wheel');
+  var wheelLegs = document.getElementById('wheelLegs');
+  var wheelAngle = 0;
+  var pivots = [];
+  var gondolas = [];
+
+  function textUnits(s){ // 估算文字寬度：中文 1、英數 0.62
+    var u = 0;
+    for(var i = 0; i < s.length; i++){ u += /[\x00-\xff]/.test(s[i]) ? 0.62 : 1; }
+    return u;
+  }
+
+  function buildWheel(){
+    var S = Math.min(wheelStage.clientWidth || cup.clientWidth || 300, 340);
+    var c = S / 2;
+    var n = shops.length;
+    wheelStage.style.height = (16 + S + 24) + 'px';
+    wheel.style.width = S + 'px';
+    wheel.style.height = S + 'px';
+    wheel.style.transition = 'none';
+    wheel.style.transform = 'rotate(0deg)';
+    wheelAngle = 0;
+    pivots = []; gondolas = [];
+
+    // 支架
+    wheelLegs.setAttribute('width', S);
+    wheelLegs.setAttribute('height', S + 22);
+    wheelLegs.setAttribute('viewBox', '0 0 ' + S + ' ' + (S + 22));
+    wheelLegs.innerHTML =
+      '<line x1="' + c + '" y1="' + c + '" x2="' + (c - S * 0.3) + '" y2="' + (S + 16) + '" stroke="#9FCDB9" stroke-width="7" stroke-linecap="round"/>' +
+      '<line x1="' + c + '" y1="' + c + '" x2="' + (c + S * 0.3) + '" y2="' + (S + 16) + '" stroke="#9FCDB9" stroke-width="7" stroke-linecap="round"/>' +
+      '<line x1="' + (c - S * 0.4) + '" y1="' + (S + 17) + '" x2="' + (c + S * 0.4) + '" y2="' + (S + 17) + '" stroke="#BFE8D4" stroke-width="5" stroke-linecap="round"/>';
+
+    wheel.innerHTML = '';
+    if(!n) return;
+
+    // 依店家數量計算車廂大小
+    var R = S / 2 - 44;
+    var gw = Math.max(30, Math.min(78, 2 * Math.PI * R / n * 0.82));
+    var gh = Math.max(28, Math.min(46, gw * 0.78));
+    R = S / 2 - gh - 12;
+
+    // 輪框、輪輻、燈泡、中心軸
+    var svg = '<svg class="wheel-frame" width="' + S + '" height="' + S + '" viewBox="0 0 ' + S + ' ' + S + '">';
+    svg += '<circle cx="' + c + '" cy="' + c + '" r="' + (R * 0.82) + '" fill="none" stroke="#BFE8D4" stroke-width="3"/>';
+    for(var i = 0; i < n; i++){
+      var a = i * 2 * Math.PI / n;
+      svg += '<line x1="' + c + '" y1="' + c + '" x2="' + (c + R * Math.sin(a)) + '" y2="' + (c - R * Math.cos(a)) + '" stroke="#BFE8D4" stroke-width="2.5"/>';
+    }
+    svg += '<circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="none" stroke="#3E9C77" stroke-width="4.5"/>';
+    for(var j = 0; j < n; j++){
+      var b = (j + 0.5) * 2 * Math.PI / n;
+      svg += '<circle cx="' + (c + R * Math.sin(b)) + '" cy="' + (c - R * Math.cos(b)) + '" r="3.2" fill="#FFD97A"/>';
+    }
+    svg += '<circle cx="' + c + '" cy="' + c + '" r="15" fill="#3E9C77"/>';
+    svg += '<circle cx="' + c + '" cy="' + c + '" r="6" fill="#FFD97A"/>';
+    svg += '</svg>';
+    wheel.innerHTML = svg;
+
+    // 車廂（以 DOM 建立，店名不會被當成 HTML 解析）
+    shops.forEach(function(name, k){
+      var ang = k * 2 * Math.PI / n;
+      var pivot = document.createElement('div');
+      pivot.className = 'g-pivot';
+      pivot.style.left = (c + R * Math.sin(ang)) + 'px';
+      pivot.style.top = (c - R * Math.cos(ang)) + 'px';
+
+      var g = document.createElement('div');
+      g.className = 'gondola c' + (k % 4);
+      g.style.width = gw + 'px';
+      g.style.height = gh + 'px';
+      g.style.left = (-gw / 2) + 'px';
+
+      var units = textUnits(name);
+      var inner = gw - 8;
+      var fs = inner / units;                 // 單行字級
+      if(fs < 11){                            // 太小就改成兩行
+        fs = Math.min(inner / Math.ceil(units / 2), (gh - 6) / 2.3);
+      }
+      fs = Math.max(9, Math.min(14, fs));
+      g.style.fontSize = fs + 'px';
+
+      var sp = document.createElement('span');
+      sp.textContent = name;
+      g.appendChild(sp);
+      pivot.appendChild(g);
+      wheel.appendChild(pivot);
+      pivots.push(pivot);
+      gondolas.push(g);
+    });
+  }
+
+  function spinWheel(){
+    if(spinning || shops.length < 2) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    setModeButtonsDisabled(true);
+    result.classList.remove('show');
+    gondolas.forEach(function(g){ g.classList.remove('win'); });
+    pivots.forEach(function(p){ p.classList.remove('win-pivot'); });
+
+    var n = shops.length;
+    var winIdx = Math.floor(Math.random() * n);
+    var theta = winIdx * 360 / n;
+    // 讓中獎車廂轉到最上方指針處，至少多轉 5 圈
+    var needed = (((-theta - wheelAngle) % 360) + 360) % 360;
+    var target = wheelAngle + 360 * 5 + needed;
+    var duration = 4200 + Math.random() * 800;
+    var ease = 'cubic-bezier(.15,.7,.12,1)';
+    void wheel.offsetHeight; // 確保重建後的起始角度先生效
+
+    wheel.style.transition = 'transform ' + duration + 'ms ' + ease;
+    wheel.style.transform = 'rotate(' + target + 'deg)';
+    // 車廂反向旋轉，保持永遠朝下
+    pivots.forEach(function(p){
+      p.style.transition = 'transform ' + duration + 'ms ' + ease;
+      p.style.transform = 'rotate(' + (-target) + 'deg)';
+    });
+    wheelAngle = target;
+
+    setTimeout(function(){
+      gondolas[winIdx].classList.add('win');
+      pivots[winIdx].classList.add('win-pivot');
+      onWin(shops[winIdx]);
+      result.classList.add('show');
+      burstConfetti();
+      spinning = false;
+      spinBtn.disabled = false;
+      setModeButtonsDisabled(false);
+    }, duration + 120);
+  }
+
+  /* ---- 模式切換 ---- */
+  var MODE_KEY = 'drinkLotteryMode';
+  var modeBtns = document.querySelectorAll('.mode-btn');
+  var machineTitle = document.getElementById('machineTitle');
+  var modeWord = document.getElementById('modeWord');
+  var mode = 'slot';
+  try{ if(localStorage.getItem(MODE_KEY) === 'wheel') mode = 'wheel'; }catch(e){}
+
+  function setModeButtonsDisabled(d){
+    for(var i = 0; i < modeBtns.length; i++) modeBtns[i].disabled = d;
+  }
+
+  function setMode(m){
+    if(spinning) return;
+    mode = m;
+    machine.classList.toggle('mode-wheel', m === 'wheel');
+    for(var i = 0; i < modeBtns.length; i++){
+      var on = modeBtns[i].getAttribute('data-mode') === m;
+      modeBtns[i].classList.toggle('active', on);
+      modeBtns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    machineTitle.textContent = m === 'wheel' ? '— 飲料店摩天輪 —' : '— 飲料店拉霸機 —';
+    modeWord.textContent = m === 'wheel' ? '摩天輪' : '拉霸機';
+    result.classList.remove('show');
+    try{ localStorage.setItem(MODE_KEY, m); }catch(e){}
+    refreshPool();
+    buildReel();
+  }
+  for(var mi = 0; mi < modeBtns.length; mi++){
+    modeBtns[mi].onclick = function(){ setMode(this.getAttribute('data-mode')); };
+  }
+
+  spinBtn.onclick = function(){
+    if(spinning) return;
+    if(poolDirty){ refreshPool(); buildReel(); }
+    if(mode === 'wheel') spinWheel(); else spinSlot();
+  };
 
   /* ---- 珍珠彩帶 ---- */
   function burstConfetti(){
@@ -470,8 +914,10 @@ footer{text-align:center;margin-top:26px;font-size:12px;color:#A5C2B5;letter-spa
   })();
 
   renderChips();
-  buildReel();
-  window.addEventListener('resize', buildReel);
+  renderCooldown();
+  renderHistory();
+  setMode(mode);
+  window.addEventListener('resize', function(){ if(!spinning) buildReel(); });
 })();
 </script>
 </body>
